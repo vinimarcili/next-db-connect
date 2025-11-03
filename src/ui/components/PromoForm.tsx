@@ -19,7 +19,7 @@ export default function PromoForm() {
     setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
 
@@ -32,7 +32,17 @@ export default function PromoForm() {
 
     setLoading(true);
     try {
-      // TODO: integração
+      const request = await fetch('/api/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const response = await request.json();
+      if (!request.ok) {
+        console.error("Erro na resposta do servidor:", response);
+        return;
+      }
+
       setForm({ name: "", email: "", gender: null });
       setSubmitted(true);
     } catch (error) {

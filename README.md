@@ -1,36 +1,243 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Oracle Database Connection
 
-## Getting Started
+Este é um projeto [Next.js](https://nextjs.org) com integração ao Oracle Database usando TypeORM. O projeto inclui um sistema de inscrições (subscribers) com funcionalidades de criação e exportação de dados em CSV.
 
-First, run the development server:
+## 🚀 Funcionalidades
+
+- ✅ **Formulário de Inscrição**: Interface para coleta de dados de usuários
+- ✅ **Integração Oracle Database**: Conexão com Oracle Cloud usando TypeORM
+- ✅ **Validação de Dados**: Validação completa de nome, email e gênero
+- ✅ **Export CSV Protegido**: Download de dados com autenticação OAuth
+- ✅ **API REST**: Endpoints para criação e consulta de subscribers
+
+## 🛠️ Tecnologias
+
+- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, TypeORM
+- **Database**: Oracle Database (Oracle Cloud)
+- **Validação**: Sistema personalizado de validação
+- **Autenticação**: Basic Auth para rotas administrativas
+
+## ⚙️ Configuração do Ambiente
+
+1. **Clone o repositório**
+
+```bash
+git clone <repository-url>
+cd next-db-connect
+```
+
+2. **Instale as dependências**
+
+```bash
+npm install
+# ou
+yarn install
+```
+
+3. **Configure as variáveis de ambiente**
+
+Copie o arquivo `.env.example` para `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Configure as seguintes variáveis no `.env.local`:
+
+```env
+# Oracle Cloud Database Configuration
+ORACLE_HOST=seu_host_oracle
+ORACLE_PORT=1522
+ORACLE_USER=seu_usuario
+ORACLE_PASSWORD=sua_senha
+ORACLE_SERVICE_NAME=seu_service_name
+ORACLE_SSL=true
+ORACLE_RETRY_COUNT=20
+ORACLE_RETRY_DELAY=3
+
+# Next SELF URL
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# Admin Credentials for CSV Download
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=sua_senha_segura
+```
+
+4. **Execute o servidor de desenvolvimento**
 
 ```bash
 npm run dev
-# or
+# ou
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📡 API Endpoints
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### POST /api/subscribers
 
-## Learn More
+Cria um novo subscriber no sistema.
 
-To learn more about Next.js, take a look at the following resources:
+**Payload:**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```json
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "gender": "male"
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Resposta de Sucesso:**
 
-## Deploy on Vercel
+```json
+{
+  "success": true,
+  "message": "Subscriber salvo com sucesso! (criado ou atualizado)"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Validações:**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Nome**: Obrigatório, mínimo 2 caracteres
+- **Email**: Obrigatório, formato válido
+- **Gênero**: Obrigatório, valores: "male", "female", "other"
+
+### GET /api/subscribers (Protegido)
+
+Exporta todos os subscribers em formato CSV.
+
+**Autenticação:** Basic Auth (credenciais definidas nas variáveis de ambiente)
+
+**Headers Obrigatórios:**
+
+```
+Authorization: Basic <base64(username:password)>
+```
+
+**Resposta:** Arquivo CSV para download
+
+## 🔒 Download de CSV Protegido
+
+A rota de exportação está protegida com autenticação Basic Auth para garantir segurança dos dados.
+
+### Como usar
+
+**Via cURL:**
+
+```bash
+curl -u admin:sua_senha \
+  -H "Accept: text/csv" \
+  -o subscribers.csv \
+  http://localhost:3000/api/subscribers
+```
+
+**Via JavaScript:**
+
+```javascript
+const username = 'admin';
+const password = 'sua_senha';
+const credentials = btoa(`${username}:${password}`);
+
+fetch('/api/subscribers', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Basic ${credentials}`,
+    'Accept': 'text/csv'
+  }
+})
+.then(response => {
+  if (response.ok) {
+    return response.blob();
+  }
+  throw new Error('Falha na autenticação');
+})
+.then(blob => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'subscribers.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+});
+```
+
+### Formato do CSV
+
+O arquivo CSV contém as seguintes colunas:
+
+- **ID**: Identificador único
+- **Nome**: Nome completo do subscriber
+- **Email**: Endereço de email
+- **Gênero**: Gênero selecionado (male/female/other)
+- **Data Criação**: Data de criação (YYYY-MM-DD)
+- **Data Atualização**: Data da última atualização (YYYY-MM-DD)
+
+## 🗄️ Estrutura do Banco de Dados
+
+**Tabela: SUBSCRIBERS**
+
+```sql
+CREATE TABLE subscribers (
+   id NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+   name VARCHAR2(100) NOT NULL,
+   email VARCHAR2(255) NOT NULL UNIQUE,
+   gender VARCHAR2(10),
+   created_at DATE DEFAULT SYSDATE,
+   updated_at DATE DEFAULT SYSDATE
+);
+```
+
+## 🧪 Testes
+
+**Testar conexão com o banco:**
+
+```bash
+npm run test-db
+```
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── subscribers/
+│   │       └── route.ts          # API endpoints
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx                  # Página principal
+├── db/
+│   ├── data-source.ts           # Configuração TypeORM
+│   ├── entities/
+│   │   └── subscribers.entity.ts # Entidade Subscribers
+│   └── sql/
+│       └── subscribes.sql       # Script de criação da tabela
+├── interfaces/                   # Definições de tipos
+├── ui/
+│   └── components/              # Componentes React
+├── validators/                   # Sistema de validação
+└── types/                       # Definições TypeScript globais
+```
+
+## 🔧 Comandos Úteis
+
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build de produção
+- `npm run start` - Inicia servidor de produção
+- `npm run test-db` - Testa conexão com o banco de dados
+
+## 📝 Notas Importantes
+
+- Configure corretamente as credenciais do Oracle Database
+- Mantenha as credenciais administrativas seguras
+- O arquivo CSV é gerado dinamicamente a cada requisição
+- A tabela deve ser criada manualmente usando o script SQL fornecido
+
+## 📚 Recursos Adicionais
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [TypeORM Documentation](https://typeorm.io/)
+- [Oracle Database Cloud](https://www.oracle.com/cloud/database/)
