@@ -1,6 +1,5 @@
-
-import BlackFridayHero from "../components/BlackFridayHero";
-import PromoForm from "../components/PromoForm";
+import BlackFridayHero from "@/ui/components/BlackFridayHero";
+import PromoForm from "@/ui/components/PromoForm";
 
 export default function Page() {
   return (

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { getFormValidationErrors } from "../../ui/utils/getFormValidationErrors";
 import TextInput from "./TextInput";
 import SelectInput from "./SelectInput";
 import Button from "./Button";
-import { getFormValidationErrors } from "../utils/getFormValidationErrors";
+import { SubscribeData } from "@/interfaces/subscribe";
 
 export default function PromoForm() {
-  const [form, setForm] = useState({ name: "", email: "", gender: "" });
+  const [form, setForm] = useState<SubscribeData>({ name: "", email: "", gender: null });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function PromoForm() {
     setLoading(true);
     try {
       // TODO: integração
-      setForm({ name: "", email: "", gender: "" });
+      setForm({ name: "", email: "", gender: null });
       setSubmitted(true);
     } catch (error) {
       console.error("Erro ao enviar o formulário:", error);
@@ -63,7 +64,7 @@ export default function PromoForm() {
       <SelectInput
         label="Gênero"
         name="gender"
-        value={form.gender}
+        value={form.gender ?? ''}
         onChange={handleChange}
         required
         error={errors.gender}
