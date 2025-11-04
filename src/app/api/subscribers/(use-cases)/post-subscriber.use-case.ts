@@ -1,5 +1,3 @@
-import { getDataSource } from "@/db/data-source";
-import { Subscribers } from "@/db/entities/subscribers.entity";
 import { SubscribeData } from "@/interfaces/subscribe.interface";
 import { ValidatorField } from "@/interfaces/validator.interface";
 import { validateEmail } from "@/validators/types/email.type-validator";
@@ -22,11 +20,7 @@ export async function postSubscriber(req: NextRequest) {
       return NextResponse.json({ success: false, errors }, { status: 400 });
     }
 
-    const db = await getDataSource();
-
-    const repository = db.getRepository(Subscribers);
-
-    await repository.upsert(data, ['email']);
+    // TODO: salvar no banco de dados
 
     return NextResponse.json({
       success: true,
