@@ -1,24 +1,32 @@
 import { Gender } from '@/interfaces/gender.interface';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity({ name: 'SUBSCRIBERS' })
+@Entity({ name: 'subscribers' })
 export class Subscribers {
-  @PrimaryGeneratedColumn({ name: 'ID' })
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number = 0;
 
-  @Column({ type: 'varchar', length: 100, name: 'NAME' })
+  @Column({ type: 'varchar', length: 100, name: 'name' })
   name: string = '';
 
-  @Column({ type: 'varchar', length: 255, name: 'EMAIL' })
+  @Column({ type: 'varchar', length: 255, name: 'email', unique: true })
   email: string = '';
 
-  @Column({ type: 'varchar', length: 10, nullable: true, name: 'GENDER' })
+  @Column({ type: 'varchar', length: 10, nullable: true, name: 'gender' })
   gender: Gender | null = null;
 
-  @CreateDateColumn({ type: 'date', name: 'CREATED_AT' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   createdAt: Date = new Date();
 
-  @UpdateDateColumn({ type: 'date', name: 'UPDATED_AT' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP'
+  })
   updatedAt: Date = new Date();
 
   constructor(init?: Partial<Subscribers>) {
