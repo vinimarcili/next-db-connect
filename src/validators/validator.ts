@@ -1,5 +1,5 @@
-import { ValidatorField } from "@/interfaces/validator";
-import { validateRequired } from "./types/required";
+import { ValidatorField } from "@/interfaces/validator.interface";
+import { validateRequired } from "./types/required.type-validator";
 
 export function validateFormData<T>(
   data: T,
@@ -10,11 +10,11 @@ export function validateFormData<T>(
   for (const field of fields) {
     const value = data[field.key];
     if (field.required) {
-    const requiredError = validateRequired(value, field.label);
-        if (requiredError) {
+      const requiredError = validateRequired(value, field.label);
+      if (requiredError) {
         errors[field.key as string] = requiredError;
         continue;
-        }
+      }
     }
     if (field.validator) {
       const specificError = field.validator(value);

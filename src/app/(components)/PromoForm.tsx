@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { getFormValidationErrors } from "../../ui/utils/getFormValidationErrors";
-import TextInput from "./TextInput";
-import SelectInput from "./SelectInput";
-import Button from "./Button";
-import { SubscribeData } from "@/interfaces/subscribe";
+import { getFormValidationErrors } from "../../ui/utils/get-form-validation-errors.util";
+import TextInput from "../../ui/components/TextInput";
+import SelectInput from "../../ui/components/SelectInput";
+import Button from "../../ui/components/Button";
+import { SubscribeData } from "@/interfaces/subscribe.interface";
 
 export default function PromoForm() {
   const [form, setForm] = useState<SubscribeData>({ name: "", email: "", gender: null });
@@ -53,7 +53,7 @@ export default function PromoForm() {
   }
 
   return (
-    <form ref={formRef} className="w-full max-w-md flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
+    <form ref={formRef} className="w-full max-w-md flex flex-col gap-6 py-4" onSubmit={handleSubmit} noValidate>
       <TextInput
         label="Nome"
         name="name"

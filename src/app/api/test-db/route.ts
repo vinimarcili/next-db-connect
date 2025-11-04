@@ -6,7 +6,7 @@ export async function GET() {
     console.log('🔧 Testando conexão com Oracle usando TypeORM...');
 
     const db = await getDataSource();
-
+    console.log('🔗 Conexão com Oracle estabelecida com sucesso.');
     const result = await db.query('SELECT 1 as TEST FROM DUAL');
     console.log('✅ Query executada com sucesso:', result);
 

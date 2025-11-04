@@ -1,4 +1,4 @@
-import { Gender } from "./gender";
+import { Gender } from "./gender.interface";
 
 export interface SubscribeData {
   id?: number;

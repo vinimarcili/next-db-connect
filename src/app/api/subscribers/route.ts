@@ -1,63 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SubscribeData } from "@/interfaces/subscribe";
-import { validateEmail } from "@/validators/types/email";
-import { validateName } from "@/validators/types/name";
-import { validateGender } from "@/validators/types/gender";
-import { ValidatorField } from "@/interfaces/validator";
+import { SubscribeData } from "@/interfaces/subscribe.interface";
+import { validateEmail } from "@/validators/types/email.type-validator";
+import { validateName } from "@/validators/types/name.type-validator";
+import { validateGender } from "@/validators/types/gender.type-validator";
+import { ValidatorField } from "@/interfaces/validator.interface";
 import { validateFormData } from "@/validators/validator";
 import { getDataSource } from "@/db/data-source";
 import { Subscribers } from "@/db/entities/subscribers.entity";
-
-function authenticateAdmin(req: NextRequest): boolean {
-  const authHeader = req.headers.get('authorization');
-
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
-    return false;
-  }
-
-  const base64Credentials = authHeader.slice(6);
-  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
-  const [username, password] = credentials.split(':');
-
-  const adminUsername = process.env.ADMIN_USERNAME;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  return username === adminUsername && password === adminPassword;
-}
-
-function generateCSV(subscribers: Subscribers[]): string {
-  const headers = ['ID', 'Nome', 'Email', 'Gênero', 'Data Criação', 'Data Atualização'];
-  const csvRows = [headers.join(',')];
-
-  subscribers.forEach(subscriber => {
-    const row = [
-      subscriber.id,
-      `"${subscriber.name.replace(/"/g, '""')}"`, // Escape quotes in CSV
-      `"${subscriber.email.replace(/"/g, '""')}"`,
-      `"${subscriber.gender || ''}"`,
-      subscriber.createdAt.toISOString().split('T')[0], // Format date as YYYY-MM-DD
-      subscriber.updatedAt.toISOString().split('T')[0]
-    ];
-    csvRows.push(row.join(','));
-  });
-
-  return csvRows.join('\n');
-}
+import { basicAuth } from '@/app/api/(auth)/basic.auth';
+import { generateSubscribersCSV } from "./(helpers)/generate-subscribers-csv.helper";
 
 export async function GET(req: NextRequest) {
   try {
-    // Verificar autenticação
-    if (!authenticateAdmin(req)) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Invalid credentials' },
-        {
-          status: 401,
-          headers: {
-            'WWW-Authenticate': 'Basic realm="Admin Area"'
-          }
-        }
-      );
-    }
+    basicAuth(req);
 
     const db = await getDataSource();
     const subscriberRepository = db.getRepository(Subscribers);
@@ -65,12 +20,10 @@ export async function GET(req: NextRequest) {
       order: { updatedAt: 'DESC' }
     });
 
-    // Gerar CSV
-    const csvData = generateCSV(subscribers);
+    const csvData = generateSubscribersCSV(subscribers);
     const currentDate = new Date().toISOString().split('T')[0];
-    const filename = `subscribers_${currentDate}.csv`;
+    const filename = `subscribers_${currentDate}_${Math.random().toString(36).substring(2, 15)}.csv`;
 
-    // Retornar CSV como download
     return new NextResponse(csvData, {
       status: 200,
       headers: {

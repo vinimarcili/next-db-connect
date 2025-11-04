@@ -1,4 +1,4 @@
-import { Gender } from "@/interfaces/gender";
+import { Gender } from "@/interfaces/gender.interface";
 
 export function validateGender(gender: Gender | null): string | null {
   if (gender === null || !["male", "female", "other"].includes(gender)) {
