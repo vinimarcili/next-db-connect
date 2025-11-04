@@ -35,6 +35,26 @@ yarn-error.log*
 .env.*
 !.env.example
 
+# Oracle Wallet files (NEVER commit these!)
+# Download from Oracle Cloud Console → DB Connection → Download Wallet
+*.sso
+*.p12
+wallet/
+Wallet_*/
+*wallet*.zip
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
+keystore.jks
+truststore.jks
+ewallet.p12
+cwallet.sso
+
+# Wallet Base64 conversion output
+wallet_base64/
+*_base64.txt
+*_b64.txt
+
 # vercel
 .vercel
 
