@@ -9,6 +9,7 @@ import { getDataSource } from "@/db/data-source";
 import { Subscribers } from "@/db/entities/subscribers.entity";
 import { basicAuth } from '@/app/api/(auth)/basic.auth';
 import { generateSubscribersCSV } from "./(helpers)/generate-subscribers-csv.helper";
+import { generateFileName } from "@/utils/generate-file-name.util";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,8 +22,7 @@ export async function GET(req: NextRequest) {
     });
 
     const csvData = generateSubscribersCSV(subscribers);
-    const currentDate = new Date().toISOString().split('T')[0];
-    const filename = `subscribers_${currentDate}_${Math.random().toString(36).substring(2, 15)}.csv`;
+    const filename = generateFileName('subscribers', 'csv');
 
     return new NextResponse(csvData, {
       status: 200,
