@@ -1,7 +1,7 @@
 import { CSVColumnConfig, ColumnType } from "@/interfaces/csv.interface";
 import { formatDate } from "./format-date.util";
 
-const DEFAULT_SEPARATOR = ',';
+const DEFAULT_SEPARATOR = ';';
 
 export function generateCSV<T>(
   data: T[],
